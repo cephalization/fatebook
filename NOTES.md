@@ -13,6 +13,7 @@
 - useRequest does not re-fire when deps change, so we need to key the content to force a re-render.
   - For example, if you drive useRequest via a userId in the URL, it will not re-fire when the userId changes.
 - Is there a more ergonomic way to handle errors in useRequest? For example, if you want to handle a private profile error differently, you have to write a custom error boundary.
+- This may just be an issue with the template, but when the user logs in / logs out, the current page does not re-render. Meaning if you are viewing a private profile, then sign out, the private profile is still visible until refresh.
 
 ## Old Questions
 
