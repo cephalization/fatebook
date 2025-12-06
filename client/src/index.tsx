@@ -12,6 +12,7 @@ import AvailableLanguages from './lib/AvailableLanguages.tsx';
 import { fate } from './lib/fate.tsx';
 import HomeRoute from './routes/HomeRoute.tsx';
 import PostRoute from './routes/PostRoute.tsx';
+import ProfileRoute from './routes/ProfileRoute.tsx';
 import SearchRoute from './routes/SearchRoute.tsx';
 import SignInRoute from './routes/SignInRoute.tsx';
 import Card from './ui/Card.tsx';
@@ -57,6 +58,7 @@ const App = () => {
             <Routes>
               <Route element={<HomeRoute />} path="/" />
               <Route element={<PostRoute />} path="/post/:id" />
+              <Route element={<ProfileRoute />} path="/profile/:userId" />
               <Route element={<SearchRoute />} path="/search" />
               <Route element={<SignInRoute />} path="/login" />
             </Routes>

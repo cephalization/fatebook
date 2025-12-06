@@ -20,6 +20,7 @@ This guidance is for agents working in projects bootstrapped from [`fate-templat
 
 ## Common Pitfalls
 
+- **Generated Client** The fate client is generated via `pnpm fate:generate`. It should not be manually edited. Instead make the proper schema changes on the server and run `pnpm fate:generate` again.
 - **Use ViewRefs:** Pass references instead of raw data. Keep components focused on views and `ViewRef`s to let fate manage data masking and updates.
 - **Co-locate data needs:** Keep view definitions near their components and compose them upward to the request root for predictable fetching.
 - **Use Suspense:** Wrap pages in `Suspense`/`ErrorBoundary` instead of ad-hoc loading/error flags; fate aligns with Async React by design.

@@ -198,6 +198,17 @@ const comments = [
   'Preloading experiments inspire confidence for SSR and make me want to try the server-side view composition story.',
 ] as const;
 
+const profiles = {
+  'maxima@nakazawa.dev': {
+    bio: 'I am a software engineer at Nakazawa.dev',
+    location: 'San Francisco, CA',
+    website: 'https://nakazawa.dev',
+    twitter: 'https://twitter.com/nakazawa_dev',
+    github: 'https://github.com/nakazawa-dev',
+    linkedin: 'https://linkedin.com/in/nakazawa-dev',
+  },
+} satisfies Record<string, unknown>;
+
 console.log(styleText('bold', '› Seeding database...'));
 
 try {
@@ -213,6 +224,25 @@ try {
 
   const seededUsers = await prisma.user.findMany();
   const usersByEmail = new Map(seededUsers.map((user) => [user.email, user]));
+
+  console.log(styleText('bold', `Seeding profiles`));
+
+  let profileIndex = 0;
+  for (const user of seededUsers) {
+    const profile = profiles[user.email as keyof typeof profiles];
+
+    if (!profile) {
+      continue;
+    }
+
+    await prisma.profile.create({
+      data: {
+        userId: user.id,
+        ...profile,
+      },
+    });
+    profileIndex++;
+  }
 
   console.log(styleText('bold', `Seeding posts and comments`));
 
@@ -254,7 +284,7 @@ try {
   console.log(
     styleText(
       ['green', 'bold'],
-      `✓ Created ${createdPosts.length} posts and ${comments.length} comments.`,
+      `✓ Created ${createdPosts.length} posts and ${comments.length} comments and ${profileIndex} profiles.`,
     ),
   );
 

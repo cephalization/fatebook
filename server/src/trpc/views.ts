@@ -3,6 +3,7 @@ import type {
   Comment as PrismaComment,
   Post as PrismaPost,
   User as PrismaUser,
+  Profile as PrismaProfile,
 } from '../prisma/prisma-client/client.ts';
 
 export type CommentItem = PrismaComment & {
@@ -14,6 +15,10 @@ export type PostItem = PrismaPost & {
   _count?: { comments: number };
   author?: PrismaUser | null;
   comments?: Array<CommentItem>;
+};
+
+export type ProfileItem = PrismaProfile & {
+  user?: PrismaUser | null;
 };
 
 export const userDataView = dataView<PrismaUser>('User')({
@@ -52,8 +57,26 @@ export const postDataView = dataView<PostItem>('Post')({
   comments: list(commentDataView),
 });
 
+export const profileDataView = dataView<ProfileItem>('Profile')({
+  id: true,
+  bio: true,
+  location: true,
+  website: true,
+  twitter: true,
+  github: true,
+  linkedin: true,
+  private: true,
+  user: userDataView,
+});
+
+export type Profile = Omit<DataViewResult<typeof profileDataView>, 'user'> & {
+  __typename: 'Profile';
+  user: User;
+};
+
 export type User = DataViewResult<typeof userDataView> & {
   __typename: 'User';
+  profile: Profile;
 };
 export type Comment = Omit<DataViewResult<typeof commentDataView>, 'author'> & {
   __typename: 'Comment';
