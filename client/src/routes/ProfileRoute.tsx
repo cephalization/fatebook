@@ -1,6 +1,6 @@
 /// <reference types="fbtee/ReactTypes.d.ts" />
 
-import type { Profile } from '@app/server/src/router.ts';
+import type { Profile, User } from '@app/server/src/router.ts';
 import Stack, { VStack } from '@nkzw/stack';
 import { fbs } from 'fbtee';
 import { ChangeEvent, Suspense, useActionState, useState } from 'react';
@@ -14,7 +14,6 @@ import ErrorDisplay from '../ui/Error.tsx';
 import H2 from '../ui/H2.tsx';
 import Input from '../ui/Input.tsx';
 import Section from '../ui/Section.tsx';
-import { UserView } from '../ui/UserCard.tsx';
 import AuthClient from '../user/AuthClient.tsx';
 
 export const ProfileView = view<Profile>()({
@@ -24,8 +23,15 @@ export const ProfileView = view<Profile>()({
   location: true,
   private: true,
   twitter: true,
-  user: UserView,
+  userId: true,
   website: true,
+});
+
+const UserView = view<User>()({
+  id: true,
+  name: true,
+  profile: ProfileView,
+  username: true,
 });
 
 const ProfileEditForm = ({
@@ -91,8 +97,8 @@ const ProfileEditForm = ({
         },
         view: ProfileView,
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update profile.');
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Failed to update profile.');
     }
   }, null);
 
@@ -312,9 +318,9 @@ const ProfileDisplay = ({
   </VStack>
 );
 
-const ProfileCard = ({ profile: profileRef }: { profile: ViewRef<'Profile'> }) => {
-  const profile = useView(ProfileView, profileRef);
-  const user = useView(UserView, profile.user);
+const ProfileCard = ({ user: userRef }: { user: ViewRef<'User'> }) => {
+  const user = useView(UserView, userRef);
+  const profile = useView(ProfileView, user.profile);
   const { data: session } = AuthClient.useSession();
   const isOwner = session?.user?.id === user.id;
 
@@ -348,15 +354,15 @@ const ProfileCard = ({ profile: profileRef }: { profile: ViewRef<'Profile'> }) =
 };
 
 const ProfileContent = ({ userId }: { userId: string }) => {
-  const { profile } = useRequest({
-    profile: {
+  const { user } = useRequest({
+    user: {
       id: userId,
-      root: ProfileView,
-      type: 'Profile',
+      root: UserView,
+      type: 'User',
     },
   } as const);
 
-  return <ProfileCard profile={profile} />;
+  return <ProfileCard user={user} />;
 };
 
 export default function ProfileRoute() {
@@ -367,8 +373,22 @@ export default function ProfileRoute() {
   }
 
   return (
-    <Section>
-      <ErrorBoundary fallbackRender={({ error }) => <ErrorDisplay error={error} />}>
+    // request does not re-fire when deps change, so we need to key the content
+    <Section key={userId}>
+      <ErrorBoundary
+        fallbackRender={({ error }) => {
+          if (error instanceof Error && error.message.includes('private')) {
+            return (
+              <Card>
+                <Stack center verticalPadding={24}>
+                  <fbt desc="Private profile text">This profile is private.</fbt>
+                </Stack>
+              </Card>
+            );
+          }
+          return <ErrorDisplay error={error} />;
+        }}
+      >
         <Suspense
           fallback={
             <Card>

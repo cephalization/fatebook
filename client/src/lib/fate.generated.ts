@@ -103,6 +103,22 @@ export const createFateClient = (options: {
               ids: ids.map(String),
               select,
             }),
+        User:
+          (client: TRPCClientType) =>
+          ({
+            args,
+            ids,
+            select,
+          }: {
+            args?: Record<string, unknown>;
+            ids: Array<string | number>;
+            select: Array<string>;
+          }) =>
+            client.user.byId.query({
+              args,
+              ids: ids.map(String),
+              select,
+            }),
       },
       client: trpcClient,
       lists: {
@@ -113,6 +129,12 @@ export const createFateClient = (options: {
     }),
     types: [
       {
+        type: 'Profile',
+      },
+      {
+        fields: {
+          profile: { type: 'Profile' },
+        },
         type: 'User',
       },
       {

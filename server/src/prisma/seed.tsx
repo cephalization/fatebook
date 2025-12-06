@@ -201,11 +201,11 @@ const comments = [
 const profiles = {
   'maxima@nakazawa.dev': {
     bio: 'I am a software engineer at Nakazawa.dev',
-    location: 'San Francisco, CA',
-    website: 'https://nakazawa.dev',
-    twitter: 'https://twitter.com/nakazawa_dev',
     github: 'https://github.com/nakazawa-dev',
     linkedin: 'https://linkedin.com/in/nakazawa-dev',
+    location: 'San Francisco, CA',
+    twitter: 'https://twitter.com/nakazawa_dev',
+    website: 'https://nakazawa.dev',
   },
 } satisfies Record<string, unknown>;
 

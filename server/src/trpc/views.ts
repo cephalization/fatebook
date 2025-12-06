@@ -1,9 +1,9 @@
-import { dataView, list, resolver, type DataViewResult } from '@nkzw/fate/server';
+import { dataView, list, resolver, type Entity } from '@nkzw/fate/server';
 import type {
   Comment as PrismaComment,
   Post as PrismaPost,
-  User as PrismaUser,
   Profile as PrismaProfile,
+  User as PrismaUser,
 } from '../prisma/prisma-client/client.ts';
 
 export type CommentItem = PrismaComment & {
@@ -21,9 +21,26 @@ export type ProfileItem = PrismaProfile & {
   user?: PrismaUser | null;
 };
 
+const baseProfile = {
+  bio: true,
+  github: true,
+  id: true,
+  linkedin: true,
+  location: true,
+  private: true,
+  twitter: true,
+  userId: true,
+  website: true,
+} as const;
+
+export const profileDataView = dataView<ProfileItem>('Profile')({
+  ...baseProfile,
+});
+
 export const userDataView = dataView<PrismaUser>('User')({
   id: true,
   name: true,
+  profile: profileDataView,
   username: true,
 });
 
@@ -57,40 +74,31 @@ export const postDataView = dataView<PostItem>('Post')({
   comments: list(commentDataView),
 });
 
-export const profileDataView = dataView<ProfileItem>('Profile')({
-  id: true,
-  bio: true,
-  location: true,
-  website: true,
-  twitter: true,
-  github: true,
-  linkedin: true,
-  private: true,
-  user: userDataView,
-});
+export type User = Entity<typeof userDataView, 'User'>;
+export type Comment = Entity<
+  typeof commentDataView,
+  'Comment',
+  {
+    author: User;
+    post: Post;
+  }
+>;
+export type Post = Entity<
+  typeof postDataView,
+  'Post',
+  {
+    author: User;
+    comments: Array<Comment>;
+  }
+>;
 
-export type Profile = Omit<DataViewResult<typeof profileDataView>, 'user'> & {
-  __typename: 'Profile';
-  user: User;
-};
-
-export type User = DataViewResult<typeof userDataView> & {
-  __typename: 'User';
-  profile: Profile;
-};
-export type Comment = Omit<DataViewResult<typeof commentDataView>, 'author'> & {
-  __typename: 'Comment';
-  author: User;
-  post: Post;
-};
-export type Post = Omit<
-  DataViewResult<typeof postDataView>,
-  'author' | 'category' | 'comments' | 'tags'
-> & {
-  __typename: 'Post';
-  author: User;
-  comments: Array<Comment>;
-};
+export type Profile = Entity<
+  typeof profileDataView,
+  'Profile',
+  {
+    user: User;
+  }
+>;
 
 export const Lists = {
   commentSearch: { procedure: 'search', view: commentDataView },

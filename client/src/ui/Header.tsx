@@ -5,6 +5,7 @@ import AuthClient from '../user/AuthClient.tsx';
 import { Button } from './Button.tsx';
 import Link from './Link.tsx';
 import LocaleSwitcher from './LocaleSwitcher.tsx';
+import { ProfileLink } from './ProfileLink.tsx';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -56,6 +57,7 @@ export default function Header() {
           </Stack>
         </Link>
         <Stack alignCenter>
+          {session?.user.id ? <ProfileLink userId={session.user.id} /> : null}
           <LocaleSwitcher />
           <Button asChild size="sm" variant="ghost">
             <Link to="/search">

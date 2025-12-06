@@ -19,6 +19,7 @@ import Card from '../ui/Card.tsx';
 import AuthClient from '../user/AuthClient.tsx';
 import CommentCard, { CommentView } from './CommentCard.tsx';
 import H3 from './H3.tsx';
+import { ProfileLink } from './ProfileLink.tsx';
 import { UserView } from './UserCard.tsx';
 
 const CommentConnectionView = {
@@ -249,7 +250,14 @@ export function PostCard({ detail, post: postRef }: { detail?: boolean; post: Vi
           </Stack>
         </Stack>
         <p className="text-foreground/90 text-sm leading-relaxed lg:text-base">{post.content}</p>
-        <p className="text-muted-foreground text-sm">- {author?.name ?? 'Unknown author'}</p>
+        <p className="text-muted-foreground text-sm">
+          -{' '}
+          {author?.name ? (
+            <ProfileLink userId={author.id}>{author.name}</ProfileLink>
+          ) : (
+            'Unknown author'
+          )}
+        </p>
         <VStack gap={16}>
           <h4 className="text-foreground text-base font-semibold">
             <fbt desc="Comment headline">

@@ -13,8 +13,8 @@ export const profileRouter = router({
     .input(
       z.object({
         args: connectionArgs,
-        select: z.array(z.string()),
         ids: z.array(z.string().min(1)).nonempty(),
+        select: z.array(z.string()),
       }),
     )
     .query(async ({ ctx, input }) => {
