@@ -24,6 +24,8 @@ export const userRouter = router({
 
       const thisUserId = ctx.sessionUser?.id;
 
+      // this is a hack to implement some naive version of access control
+      // what I actually want is to allow users to select some fields in
       if (!thisUserId) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',

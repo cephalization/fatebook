@@ -124,11 +124,15 @@ export const createFateClient = (options: {
       lists: {
         commentSearch: (client: TRPCClientType) => client.comment.search.query,
         posts: (client: TRPCClientType) => client.post.list.query,
+        profileByUserId: (client: TRPCClientType) => client.profile.byUserId.query,
       },
       mutations,
     }),
     types: [
       {
+        fields: {
+          user: { type: 'User' },
+        },
         type: 'Profile',
       },
       {

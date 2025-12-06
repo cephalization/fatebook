@@ -2,9 +2,11 @@ import { connectionArgs, createResolver } from '@nkzw/fate/server';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import type {
+  ProfileFindManyArgs,
   ProfileFindUniqueArgs,
   ProfileUpsertArgs,
 } from '../../prisma/prisma-client/models.ts';
+import { createConnectionProcedure } from '../connection.ts';
 import { procedure, router } from '../init.ts';
 import { profileDataView } from '../views.ts';
 
@@ -47,18 +49,21 @@ export const profileRouter = router({
 
       return resolveMany(profiles);
     }),
-  byUserId: procedure
-    .input(
-      z.object({
-        args: connectionArgs,
-        select: z.array(z.string()),
-        userId: z.string().min(1, 'User ID is required'),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
+  byUserId: createConnectionProcedure({
+    input: z.object({
+      userId: z.string().min(1, 'User ID is required'),
+    }),
+    query: async ({ ctx, cursor, direction, input, skip, take }) => {
+      if (!input.args?.userId) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'User ID is required',
+        });
+      }
+
       const profile = await ctx.prisma.profile.findUnique({
         select: { private: true, userId: true },
-        where: { userId: input.userId },
+        where: { userId: input.args.userId },
       });
 
       if (!profile) {
@@ -75,20 +80,20 @@ export const profileRouter = router({
         });
       }
 
-      const { resolve, select } = createResolver({
+      const { resolveMany, select } = createResolver({
         ...input,
         ctx,
         view: profileDataView,
       });
 
-      return resolve(
-        await ctx.prisma.profile.findUniqueOrThrow({
+      return resolveMany(
+        await ctx.prisma.profile.findMany({
           select,
-          where: { userId: input.userId },
-        } as ProfileFindUniqueArgs),
+          where: { userId: input.args.userId },
+        } as ProfileFindManyArgs),
       );
-    }),
-
+    },
+  }),
   me: procedure
     .input(
       z.object({

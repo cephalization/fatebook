@@ -16,6 +16,12 @@ import Input from '../ui/Input.tsx';
 import Section from '../ui/Section.tsx';
 import AuthClient from '../user/AuthClient.tsx';
 
+const UserView = view<User>()({
+  id: true,
+  name: true,
+  username: true,
+});
+
 export const ProfileView = view<Profile>()({
   bio: true,
   github: true,
@@ -23,15 +29,9 @@ export const ProfileView = view<Profile>()({
   location: true,
   private: true,
   twitter: true,
+  user: UserView,
   userId: true,
   website: true,
-});
-
-const UserView = view<User>()({
-  id: true,
-  name: true,
-  profile: ProfileView,
-  username: true,
 });
 
 const ProfileEditForm = ({
@@ -318,11 +318,11 @@ const ProfileDisplay = ({
   </VStack>
 );
 
-const ProfileCard = ({ user: userRef }: { user: ViewRef<'User'> }) => {
-  const user = useView(UserView, userRef);
-  const profile = useView(ProfileView, user.profile);
+const ProfileCard = ({ profile: profileRef }: { profile: ViewRef<'Profile'> }) => {
+  const profile = useView(ProfileView, profileRef);
+  const user = useView(UserView, profile.user);
   const { data: session } = AuthClient.useSession();
-  const isOwner = session?.user?.id === user.id;
+  const isOwner = session?.user?.id === profile.userId;
 
   return (
     <VStack gap={32}>
@@ -354,15 +354,17 @@ const ProfileCard = ({ user: userRef }: { user: ViewRef<'User'> }) => {
 };
 
 const ProfileContent = ({ userId }: { userId: string }) => {
-  const { user } = useRequest({
-    user: {
-      id: userId,
-      root: UserView,
-      type: 'User',
+  const { profileByUserId } = useRequest({
+    profileByUserId: {
+      args: { userId },
+      root: ProfileView,
+      type: 'Profile',
     },
   } as const);
 
-  return <ProfileCard user={user} />;
+  const profile = profileByUserId[0];
+
+  return <ProfileCard profile={profile} />;
 };
 
 export default function ProfileRoute() {

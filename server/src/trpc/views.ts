@@ -35,6 +35,11 @@ const baseProfile = {
 
 export const profileDataView = dataView<ProfileItem>('Profile')({
   ...baseProfile,
+  user: dataView<PrismaUser>('User')({
+    id: true,
+    name: true,
+    username: true,
+  }),
 });
 
 export const userDataView = dataView<PrismaUser>('User')({
@@ -103,4 +108,5 @@ export type Profile = Entity<
 export const Lists = {
   commentSearch: { procedure: 'search', view: commentDataView },
   posts: postDataView,
+  profileByUserId: { procedure: 'byUserId', view: profileDataView },
 };

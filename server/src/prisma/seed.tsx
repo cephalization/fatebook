@@ -198,6 +198,20 @@ const comments = [
   'Preloading experiments inspire confidence for SSR and make me want to try the server-side view composition story.',
 ] as const;
 
+const LOCATIONS = [
+  'San Francisco, CA',
+  'New York, NY',
+  'London, UK',
+  'Paris, France',
+  'Tokyo, Japan',
+  'Sydney, Australia',
+  'Berlin, Germany',
+];
+
+const getRandomLocation = () => {
+  return randomEntry(LOCATIONS);
+};
+
 const profiles = {
   'maxima@nakazawa.dev': {
     bio: 'I am a software engineer at Nakazawa.dev',
@@ -207,6 +221,23 @@ const profiles = {
     twitter: 'https://twitter.com/nakazawa_dev',
     website: 'https://nakazawa.dev',
   },
+  ...Object.fromEntries(
+    users.values().map((user) => {
+      const domain = user.email.split('@')[1];
+      const username = user.data.username;
+      return [
+        user.email,
+        {
+          bio: `I am a software engineer at ${domain}`,
+          github: `https://github.com/${username}`,
+          linkedin: `https://linkedin.com/in/${username}`,
+          location: getRandomLocation(),
+          twitter: `https://twitter.com/${username}`,
+          website: `https://${username}.${domain}`,
+        },
+      ];
+    }),
+  ),
 } satisfies Record<string, unknown>;
 
 console.log(styleText('bold', '› Seeding database...'));
