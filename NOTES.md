@@ -1,14 +1,20 @@
-## Add Profile feature
+# Add Profile feature
 
 - [x] Add profile model to prisma schema
   - [x] Execute prisma migration + generate client
 - [x] Add profile router to server
-- [ ] Add profile to server views
-  - [ ] Generate fate client
+- [x] Add profile to server views
+  - [x] Generate fate client
 - [x] Add profile route to client
 - [x] Add profile page to client
 
 ## Questions
+
+- useRequest does not re-fire when deps change, so we need to key the content to force a re-render.
+  - For example, if you drive useRequest via a userId in the URL, it will not re-fire when the userId changes.
+- Is there a more ergonomic way to handle errors in useRequest? For example, if you want to handle a private profile error differently, you have to write a custom error boundary.
+
+## Old Questions
 
 - How do I handle a resolver that returns data with access control? For example, if a profile is private, we need to check if the user is the owner of the profile. If not, we need to return an error.
 - How does the fate client compiler work? Where does it look for the types to generate?
