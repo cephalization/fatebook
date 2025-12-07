@@ -3,8 +3,22 @@ import type {
   Comment as PrismaComment,
   Post as PrismaPost,
   Profile as PrismaProfile,
+  ChatRoom as PrismaChatRoom,
+  ChatRoomMessage as PrismaChatRoomMessage,
   User as PrismaUser,
 } from '../prisma/prisma-client/client.ts';
+
+export type ChatRoomItem = PrismaChatRoom & {
+  _count?: { adminsInChatRoom: number; chatRoomMessages: number; usersInChatRoom: number };
+  adminsInChatRoom: Array<PrismaUser>;
+  chatRoomMessages: Array<PrismaChatRoomMessage>;
+  usersInChatRoom: Array<PrismaUser>;
+};
+
+export type ChatRoomMessageItem = PrismaChatRoomMessage & {
+  author: PrismaUser;
+  chatRoom: PrismaChatRoom;
+};
 
 export type CommentItem = PrismaComment & {
   author?: PrismaUser | null;
@@ -79,6 +93,30 @@ export const postDataView = dataView<PostItem>('Post')({
   comments: list(commentDataView),
 });
 
+const baseChatRoom = {
+  createdAt: true,
+  description: true,
+  id: true,
+  name: true,
+  updatedAt: true,
+} as const;
+
+export const chatRoomMessageDataView = dataView<ChatRoomMessageItem>('ChatRoomMessage')({
+  author: userDataView,
+  chatRoom: dataView<PrismaChatRoom>('ChatRoom')({
+    ...baseChatRoom,
+  }),
+  content: true,
+  id: true,
+});
+
+export const chatRoomDataView = dataView<ChatRoomItem>('ChatRoom')({
+  ...baseChatRoom,
+  adminsInChatRoom: list(userDataView),
+  chatRoomMessagesInChatRooms: list(chatRoomMessageDataView),
+  usersInChatRoom: list(userDataView),
+});
+
 export type User = Entity<typeof userDataView, 'User'>;
 export type Comment = Entity<
   typeof commentDataView,
@@ -105,7 +143,28 @@ export type Profile = Entity<
   }
 >;
 
+export type ChatRoom = Entity<
+  typeof chatRoomDataView,
+  'ChatRoom',
+  {
+    adminsInChatRoom: Array<User>;
+    chatRoomMessages: Array<ChatRoomMessage>;
+    usersInChatRoom: Array<User>;
+  }
+>;
+
+export type ChatRoomMessage = Entity<
+  typeof chatRoomMessageDataView,
+  'ChatRoomMessage',
+  {
+    author: User;
+    chatRoom: ChatRoom;
+  }
+>;
+
 export const Lists = {
+  chatRoomMessages: chatRoomMessageDataView,
+  chatRooms: chatRoomDataView,
   commentSearch: { procedure: 'search', view: commentDataView },
   posts: postDataView,
   profileByUserId: { procedure: 'byUserId', view: profileDataView },

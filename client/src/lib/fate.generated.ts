@@ -143,6 +143,21 @@ export const createFateClient = (options: {
       },
       {
         fields: {
+          adminsInChatRoom: { listOf: 'User' },
+          chatRoomMessagesInChatRooms: { listOf: 'ChatRoomMessage' },
+          usersInChatRoom: { listOf: 'User' },
+        },
+        type: 'ChatRoom',
+      },
+      {
+        fields: {
+          author: { type: 'User' },
+          chatRoom: { type: 'ChatRoom' },
+        },
+        type: 'ChatRoomMessage',
+      },
+      {
+        fields: {
           author: { type: 'User' },
           comments: { listOf: 'Comment' },
         },

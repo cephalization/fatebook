@@ -12,25 +12,28 @@ datasource db {
 }
 
 model User {
-  id              String    @id @unique @default(uuid(7))
-  accounts        Account[]
-  banExpires      DateTime?
-  banned          Boolean?
-  banReason       String?
-  createdAt       DateTime  @default(now())
-  displayUsername String?
-  email           String    @unique
-  emailVerified   Boolean
-  image           String?
-  name            String
-  password        String?
-  role            String    @default("user")
-  sessions        Session[]
-  posts           Post[]
-  comments        Comment[]
-  updatedAt       DateTime
-  username        String?   @unique
-  profile         Profile?
+  id               String             @id @unique @default(uuid(7))
+  accounts         Account[]
+  banExpires       DateTime?
+  banned           Boolean?
+  banReason        String?
+  createdAt        DateTime           @default(now())
+  displayUsername  String?
+  email            String             @unique
+  emailVerified    Boolean
+  image            String?
+  name             String
+  password         String?
+  role             String             @default("user")
+  sessions         Session[]
+  posts            Post[]
+  comments         Comment[]
+  updatedAt        DateTime
+  username         String?            @unique
+  profile          Profile?
+  userInChatRooms  UsersInChatRoom[]
+  adminInChatRooms AdminsInChatRoom[]
+  chatRoomMessages ChatRoomMessage[]
 
   @@index([id(sort: Asc)])
   @@map("user")
@@ -111,4 +114,50 @@ model Profile {
   twitter   String?
   github    String?
   linkedin  String?
+}
+
+model ChatRoom {
+  id               String             @id @default(uuid(7))
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  name             String
+  description      String?
+  // only users in the chat room can see the chat room
+  private          Boolean            @default(false)
+  usersInChatRoom  UsersInChatRoom[]
+  adminsInChatRoom AdminsInChatRoom[]
+  chatRoomMessages ChatRoomMessage[]
+}
+
+model ChatRoomMessage {
+  id         String   @id @default(uuid(7))
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  chatRoomId String
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+}
+
+model AdminsInChatRoom {
+  id         String   @id @default(uuid(7))
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatRoomId String
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chatRoomId])
+  @@map("admins_in_chat_room")
+}
+
+model UsersInChatRoom {
+  id         String   @id @default(uuid(7))
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatRoomId String
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chatRoomId])
+  @@map("users_in_chat_room")
 }

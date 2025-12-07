@@ -1,10 +1,14 @@
 import { router } from './trpc/init.ts';
+import { chatRoomRouter } from './trpc/routers/chatRoom.ts';
+import { chatRoomMessageRouter } from './trpc/routers/chatRoomMessage.ts';
 import { commentRouter } from './trpc/routers/comment.ts';
 import { postRouter } from './trpc/routers/post.ts';
 import { profileRouter } from './trpc/routers/profile.ts';
 import { userRouter } from './trpc/routers/user.ts';
 
 export const appRouter = router({
+  chatRoom: chatRoomRouter,
+  chatRoomMessage: chatRoomMessageRouter,
   comment: commentRouter,
   post: postRouter,
   profile: profileRouter,
