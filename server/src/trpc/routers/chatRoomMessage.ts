@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type {
   ChatRoomMessageFindManyArgs,
   ChatRoomMessageSelect,
+  ChatRoomWhereInput,
 } from '../../prisma/prisma-client/models.ts';
 import { createConnectionProcedure } from '../connection.ts';
 import { procedure, router } from '../init.ts';
@@ -256,7 +257,16 @@ export const chatRoomMessageRouter = router({
         findOptions.skip = skip;
       }
 
-      const items = await ctx.prisma.chatRoomMessage.findMany(findOptions);
+      const items = await ctx.prisma.chatRoomMessage.findMany({
+        ...findOptions,
+        where: {
+          ...findOptions.where,
+          chatRoom: {
+            ...(findOptions.where?.chatRoom as ChatRoomWhereInput | undefined),
+            ...getChatRoomPrivacyClause(ctx.sessionUser?.id),
+          },
+        },
+      });
       return resolveMany(direction === 'forward' ? items : items.reverse());
     },
   }),

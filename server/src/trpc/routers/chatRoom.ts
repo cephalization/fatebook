@@ -5,6 +5,19 @@ import { createConnectionProcedure } from '../connection.ts';
 import { procedure, router } from '../init.ts';
 import { chatRoomDataView } from '../views.ts';
 
+const getChatRoomPrivacyClause = (thisUserId?: string) => {
+  if (!thisUserId) {
+    return { private: false };
+  }
+  return {
+    OR: [
+      { private: false },
+      { adminsInChatRoom: { some: { userId: thisUserId } } },
+      { private: true, usersInChatRoom: { some: { userId: thisUserId } } },
+    ],
+  };
+};
+
 export const chatRoomRouter = router({
   byId: procedure
     .input(
@@ -23,7 +36,7 @@ export const chatRoomRouter = router({
       return resolveMany(
         await ctx.prisma.chatRoom.findMany({
           select,
-          where: { id: { in: input.ids } },
+          where: { id: { in: input.ids }, ...getChatRoomPrivacyClause(ctx.sessionUser?.id) },
         } as ChatRoomFindManyArgs),
       );
     }),
@@ -45,7 +58,10 @@ export const chatRoomRouter = router({
         findOptions.skip = skip;
       }
 
-      const items = await ctx.prisma.chatRoom.findMany(findOptions);
+      const items = await ctx.prisma.chatRoom.findMany({
+        ...findOptions,
+        where: { ...findOptions.where, ...getChatRoomPrivacyClause(ctx.sessionUser?.id) },
+      });
       return resolveMany(direction === 'forward' ? items : items.reverse());
     },
   }),
