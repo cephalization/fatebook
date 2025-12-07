@@ -164,6 +164,7 @@ export type ChatRoomMessage = Entity<
 
 export const Lists = {
   chatRoomMessages: chatRoomMessageDataView,
+  chatRoomMessageSearch: { procedure: 'search', view: chatRoomMessageDataView },
   chatRooms: chatRoomDataView,
   commentSearch: { procedure: 'search', view: commentDataView },
   posts: postDataView,

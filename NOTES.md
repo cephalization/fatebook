@@ -2,9 +2,11 @@
 
 ## Questions
 
+- The fate generate CLI cannot generate router definitions for routers that use camelCase for their keys. For example, `chatRoom` instead of `chatroom`. Verified by looking at the code in `node_modules/@nkzw/fate/lib/cli.mjs`.
 - The fate generate CLI gets angry when you import types without the type specifier. For example, `import type { ChatRoomMessageFindManyArgs } from '../../prisma/prisma-client/models.ts';` instead of `import { ChatRoomMessageFindManyArgs } from '../../prisma/prisma-client/models.ts';`
 We should update the tsconfig so that imports automatically add the type specifier when relevant.
-- I find myself double-querying in router procedures. For example, I query once with the selection fields I need to do access control, then I query again with the selection fields I need to return the data with the resolver helper. Is there a way to do this in a single query?
+- ~~I find myself double-querying in router procedures. For example, I query once with the selection fields I need to do access control, then I query again with the selection fields I need to return the data with the resolver helper. Is there a way to do this in a single query?~~
+  - I can fix this by performing access control in the where clause of my prisma queries, no need to select additional fields for access control.
 
 ## Add Profile feature
 
