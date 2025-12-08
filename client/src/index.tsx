@@ -16,6 +16,7 @@ import ProfileRoute from './routes/ProfileRoute.tsx';
 import SearchRoute from './routes/SearchRoute.tsx';
 import SignInRoute from './routes/SignInRoute.tsx';
 import Card from './ui/Card.tsx';
+import { ChatModal } from './ui/chat/ChatModal.tsx';
 import Error from './ui/Error.tsx';
 import Header from './ui/Header.tsx';
 import Section from './ui/Section.tsx';
@@ -63,6 +64,7 @@ const App = () => {
               <Route element={<SignInRoute />} path="/login" />
             </Routes>
           </Suspense>
+          <ChatModal className="fixed bottom-4 right-4" />
         </ErrorBoundary>
       </div>
     </div>

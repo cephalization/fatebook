@@ -1,6 +1,7 @@
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { ButtonHTMLAttributes, useTransition } from 'react';
+import { useTransition } from 'react';
+import { Button as AriaButton, type ButtonProps as AriaButtonProps } from 'react-aria-components';
 import cx from '../lib/cx.tsx';
 
 const buttonVariants = cva(
@@ -33,26 +34,39 @@ const Button = ({
   action,
   asChild = false,
   className,
-  disabled,
+  isDisabled,
   onClick: initialOnClick,
   size,
   variant,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> &
+}: AriaButtonProps &
   VariantProps<typeof buttonVariants> & {
     action?: () => void;
     asChild?: boolean;
   }) => {
-  const Component = asChild ? Slot : 'button';
-
   const [isPending, startTransition] = useTransition();
 
   const onClick = initialOnClick || (action ? () => startTransition(action) : undefined);
 
+  if (asChild) {
+    const { slot: _, style, ...rest } = props;
+    return (
+      <Slot
+        {...rest}
+        aria-disabled={isDisabled !== undefined ? isDisabled : isPending}
+        className={cx(buttonVariants({ className, size, variant }))}
+        onClick={onClick}
+        style={typeof style === 'object' ? style : undefined}
+      >
+        {typeof props.children === 'function' ? null : props.children}
+      </Slot>
+    );
+  }
+
   return (
-    <Component
+    <AriaButton
       className={cx(buttonVariants({ className, size, variant }))}
-      disabled={disabled !== undefined ? disabled : isPending}
+      isDisabled={isDisabled !== undefined ? isDisabled : isPending}
       onClick={onClick}
       {...props}
     />

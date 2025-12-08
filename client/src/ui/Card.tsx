@@ -23,7 +23,7 @@ export default function Card({
         className="relative z-10 flex w-full h-full"
         gap={16}
         horizontalPadding={20}
-        verticalPadding={16}
+        verticalPadding={12}
       >
         {children}
       </VStack>

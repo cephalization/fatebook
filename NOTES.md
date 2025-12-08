@@ -2,6 +2,7 @@
 
 ## Questions
 
+- When you add a chat room, the connection is not updated optimistically or concretely with response data. The connection view is the root request view, this is possibly why it is not working.
 - The fate generate CLI cannot generate router definitions for routers that use camelCase for their keys. For example, `chatRoom` instead of `chatroom`. Verified by looking at the code in `node_modules/@nkzw/fate/lib/cli.mjs`.
 - The fate generate CLI gets angry when you import types without the type specifier. For example, `import type { ChatRoomMessageFindManyArgs } from '../../prisma/prisma-client/models.ts';` instead of `import { ChatRoomMessageFindManyArgs } from '../../prisma/prisma-client/models.ts';`
 We should update the tsconfig so that imports automatically add the type specifier when relevant.

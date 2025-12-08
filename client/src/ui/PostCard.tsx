@@ -87,7 +87,7 @@ const CommentInput = ({
     }
   };
 
-  const commentingIsDisabled = addCommentIsPending || commentText.trim().length === 0;
+  const commentingIsisDisabled = addCommentIsPending || commentText.trim().length === 0;
 
   const anyServerError = error || addCommentResult?.error;
 
@@ -97,7 +97,7 @@ const CommentInput = ({
         <fbt desc="Comment add label">Add a comment</fbt>
       </span>
       <textarea
-        className="min-h-20 w-full placeholder-gray-500 dark:placeholder-gray-400 transition outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 disabled:opacity-50 squircle border border-gray-200/80 bg-gray-100/50 p-3 text-sm dark:border-neutral-800 dark:bg-neutral-900/40"
+        className="min-h-20 w-full placeholder-gray-500 dark:placeholder-gray-400 transition outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 isDisabled:opacity-50 squircle border border-gray-200/80 bg-gray-100/50 p-3 text-sm dark:border-neutral-800 dark:bg-neutral-900/40"
         disabled={addCommentIsPending}
         onChange={(event) => setCommentText(event.target.value)}
         onKeyDown={maybeSubmitComment}
@@ -114,7 +114,7 @@ const CommentInput = ({
         </p>
       ) : null}
       <Stack end gap>
-        <Button disabled={commentingIsDisabled} size="sm" type="submit" variant="secondary">
+        <Button isDisabled={commentingIsisDisabled} size="sm" type="submit" variant="secondary">
           <fbt desc="Post comment button">Post comment</fbt>
         </Button>
       </Stack>
@@ -183,13 +183,13 @@ export function PostCard({ detail, post: postRef }: { detail?: boolean; post: Vi
                 </fbt>
               </span>
             </Stack>
-            <Button action={handleLike} disabled={likeIsPending} size="sm" variant="outline">
+            <Button action={handleLike} isDisabled={likeIsPending} size="sm" variant="outline">
               <fbt desc="Like button">Like</fbt>
             </Button>
             {detail && (
               <Button
                 action={() => handleLike({ slow: true })}
-                disabled={likeIsPending}
+                isDisabled={likeIsPending}
                 size="sm"
                 variant="outline"
               >
@@ -203,7 +203,7 @@ export function PostCard({ detail, post: postRef }: { detail?: boolean; post: Vi
                   'w-32 transition-colors duration-150',
                   likeResult?.error ? 'border-red-500 text-red-500 hover:text-red-500' : '',
                 )}
-                disabled={likeIsPending}
+                isDisabled={likeIsPending}
                 size="sm"
                 variant="outline"
               >
@@ -217,7 +217,7 @@ export function PostCard({ detail, post: postRef }: { detail?: boolean; post: Vi
             {detail && (
               <Button
                 action={() => handleLike({ error: 'boundary' })}
-                disabled={likeIsPending}
+                isDisabled={likeIsPending}
                 size="sm"
                 variant="outline"
               >
@@ -241,7 +241,7 @@ export function PostCard({ detail, post: postRef }: { detail?: boolean; post: Vi
             )}
             <Button
               action={handleUnlike}
-              disabled={unlikeIsPending || post.likes === 0}
+              isDisabled={unlikeIsPending || post.likes === 0}
               size="sm"
               variant="outline"
             >

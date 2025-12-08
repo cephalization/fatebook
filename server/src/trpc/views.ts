@@ -8,6 +8,8 @@ import type {
   User as PrismaUser,
 } from '../prisma/prisma-client/client.ts';
 
+export type UserItem = PrismaUser;
+
 export type ChatRoomItem = PrismaChatRoom & {
   _count?: { adminsInChatRoom: number; chatRoomMessages: number; usersInChatRoom: number };
   adminsInChatRoom: Array<PrismaUser>;
@@ -107,13 +109,15 @@ export const chatRoomMessageDataView = dataView<ChatRoomMessageItem>('ChatRoomMe
     ...baseChatRoom,
   }),
   content: true,
+  createdAt: true,
   id: true,
+  updatedAt: true,
 });
 
 export const chatRoomDataView = dataView<ChatRoomItem>('ChatRoom')({
   ...baseChatRoom,
   adminsInChatRoom: list(userDataView),
-  chatRoomMessagesInChatRooms: list(chatRoomMessageDataView),
+  chatRoomMessages: list(chatRoomMessageDataView),
   usersInChatRoom: list(userDataView),
 });
 

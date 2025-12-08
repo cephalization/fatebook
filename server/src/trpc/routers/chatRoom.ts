@@ -1,9 +1,10 @@
 import { connectionArgs, createResolver } from '@nkzw/fate/server';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import type { ChatRoomFindManyArgs } from '../../prisma/prisma-client/models.ts';
 import { createConnectionProcedure } from '../connection.ts';
 import { procedure, router } from '../init.ts';
-import { chatRoomDataView } from '../views.ts';
+import { chatRoomDataView, type ChatRoomItem } from '../views.ts';
 
 const getChatRoomPrivacyClause = (thisUserId?: string) => {
   if (!thisUserId) {
@@ -39,6 +40,49 @@ export const chatRoomRouter = router({
           where: { id: { in: input.ids }, ...getChatRoomPrivacyClause(ctx.sessionUser?.id) },
         } as ChatRoomFindManyArgs),
       );
+    }),
+  create: procedure
+    .input(
+      z.object({
+        description: z.string().optional(),
+        isPrivate: z.boolean(),
+        name: z.string().min(1, 'Name is required'),
+        select: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.sessionUser) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to create a chat room',
+        });
+      }
+      const thisUserId = ctx.sessionUser.id;
+      const { resolve, select } = createResolver({
+        ...input,
+        ctx,
+        view: chatRoomDataView,
+      });
+      const chatRoom = (await ctx.prisma.chatRoom.create({
+        data: {
+          adminsInChatRoom: {
+            create: {
+              userId: thisUserId,
+            },
+          },
+          description: input.description,
+          name: input.name,
+          private: input.isPrivate,
+          usersInChatRoom: {
+            create: {
+              userId: thisUserId,
+            },
+          },
+        },
+        select,
+        // figure out why I need to cast this
+      })) as unknown as ChatRoomItem;
+      return resolve(chatRoom);
     }),
   list: createConnectionProcedure({
     query: async ({ ctx, cursor, direction, input, skip, take }) => {

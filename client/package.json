@@ -31,6 +31,7 @@
     "fbtee": "^1.7.2",
     "lucide-react": "^0.556.0",
     "react": "^19.2.1",
+    "react-aria-components": "^1.13.0",
     "react-dom": "^19.2.1",
     "react-error-boundary": "^6.0.0",
     "react-fate": "^0.0.6",

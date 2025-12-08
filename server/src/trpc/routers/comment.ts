@@ -61,16 +61,16 @@ export const commentRouter = router({
         view: commentDataView,
       });
 
-      return resolve(
-        await ctx.prisma.comment.create({
-          data: {
-            authorId: ctx.sessionUser.id,
-            content: input.content,
-            postId: input.postId,
-          },
-          select: getCommentSelection(select),
-        }),
-      ) as Promise<CommentItem & { post?: { commentCount: number } }>;
+      const comment = await ctx.prisma.comment.create({
+        data: {
+          authorId: ctx.sessionUser.id,
+          content: input.content,
+          postId: input.postId,
+        },
+        select: getCommentSelection(select),
+      });
+
+      return resolve(comment) as Promise<CommentItem & { post?: { commentCount: number } }>;
     }),
   byId: procedure
     .input(

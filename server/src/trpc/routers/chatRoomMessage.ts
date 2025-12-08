@@ -10,13 +10,6 @@ import { createConnectionProcedure } from '../connection.ts';
 import { procedure, router } from '../init.ts';
 import { chatRoomMessageDataView, type ChatRoomMessageItem } from '../views.ts';
 
-const chatRoomMessageSelection = {
-  content: true,
-  createdAt: true,
-  id: true,
-  updatedAt: true,
-} as const;
-
 const getChatRoomPrivacyClause = (thisUserId?: string) => {
   if (!thisUserId) {
     return { private: false };
@@ -39,12 +32,15 @@ const mutateChatRoomMessagePrivacyClause = (thisUserId: string) => {
 const getChatRoomMessageSelection = (select: Record<string, unknown>) => {
   return {
     ...select,
-    chatRoom: {
-      select: {
-        ...chatRoomMessageSelection,
-        ...(select.chatRoom as { select?: Record<string, unknown> })?.select,
-      },
-    },
+    ...((select.chatRoom as { select?: Record<string, unknown> })
+      ? {
+          chatRoom: {
+            select: {
+              ...(select.chatRoom as { select?: Record<string, unknown> }).select,
+            },
+          },
+        }
+      : {}),
   } as ChatRoomMessageSelect;
 };
 

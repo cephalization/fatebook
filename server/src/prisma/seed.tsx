@@ -2,6 +2,7 @@
 import randomEntry from '@nkzw/core/randomEntry.js';
 import { styleText } from 'node:util';
 import { auth } from '../lib/auth.ts';
+import { ChatRoomCreateInput } from './prisma-client/models.ts';
 import prisma from './prisma.ts';
 
 const users = new Set([
@@ -198,6 +199,19 @@ const comments = [
   'Preloading experiments inspire confidence for SSR and make me want to try the server-side view composition story.',
 ] as const;
 
+const chatRooms = [
+  {
+    description: 'General chat room',
+    name: 'General',
+    private: false,
+  },
+  {
+    description: 'Private chat room',
+    name: 'Private Chat Room',
+    private: true,
+  },
+] satisfies Array<ChatRoomCreateInput>;
+
 const LOCATIONS = [
   'San Francisco, CA',
   'New York, NY',
@@ -310,6 +324,37 @@ try {
     });
 
     index++;
+  }
+
+  console.log(styleText('bold', `Seeding chat rooms`));
+
+  for (const chatRoom of chatRooms) {
+    if (chatRoom.private) {
+      const maxUserId = usersByEmail.get('maxima@nakazawa.dev')?.id;
+      if (!maxUserId) {
+        throw new Error('Maxima user not found.');
+      }
+      const privateChatRoom = await prisma.chatRoom.create({
+        data: {
+          ...chatRoom,
+          adminsInChatRoom: {
+            create: {
+              userId: maxUserId,
+            },
+          },
+          usersInChatRoom: {
+            create: {
+              userId: maxUserId,
+            },
+          },
+        },
+      });
+      console.log(privateChatRoom);
+      continue;
+    }
+    await prisma.chatRoom.create({
+      data: chatRoom,
+    });
   }
 
   console.log(
