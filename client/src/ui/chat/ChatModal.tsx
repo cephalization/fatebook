@@ -5,8 +5,8 @@ import { FormEvent, startTransition, Suspense, useActionState, useState } from '
 import { DialogTrigger } from 'react-aria-components';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ConnectionRef, useListView, useRequest, useView, view, ViewRef } from 'react-fate';
+import { useFateClient } from 'react-fate';
 import cx from '../../lib/cx.tsx';
-import { fate } from '../../lib/fate.tsx';
 import AuthClient from '../../user/AuthClient.tsx';
 import { Button } from '../Button.tsx';
 import Card from '../Card.tsx';
@@ -66,7 +66,7 @@ const ChatModalContent = () => {
   const [creatingChatRoom, setCreatingChatRoom] = useState(false);
   const { chatRooms } = useRequest({
     chatRooms: {
-      root: ChatRoomConnectionView,
+      list: ChatRoomConnectionView,
       type: 'ChatRoom',
     },
   });
@@ -154,6 +154,7 @@ const CreateChatRoomForm = ({
   onCancel: () => void;
   onSuccess: () => void;
 }) => {
+  const fate = useFateClient();
   const { data: session } = AuthClient.useSession();
   const thisUserId = session?.user?.id;
   const [chatRoomName, setChatRoomName] = useState('');
@@ -161,7 +162,7 @@ const CreateChatRoomForm = ({
   const [isPrivate, setIsPrivate] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [, handleCreateChatRoom, createChatRoomIsPending] = useActionState(async () => {
-    const result = await fate.mutations.chatroom.create({
+    const result = await fate.mutations.chatRoom.create({
       input: { description: chatRoomDescription, isPrivate, name: chatRoomName },
       optimistic: {
         adminsInChatRoom: [

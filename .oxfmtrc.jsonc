@@ -9,10 +9,10 @@
     ".vitepress/dist",
     "coverage/",
     "dist/",
-    "example/client/dist/",
-    "example/client/src/lib/fate.generated.ts",
-    "example/client/src/translations/",
-    "example/server/dist",
+    "client/dist/",
+    "client/src/fate.ts",
+    "client/src/translations/",
+    "server/dist",
     "pnpm-lock.yaml"
   ]
 }

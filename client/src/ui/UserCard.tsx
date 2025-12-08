@@ -4,7 +4,7 @@ import Stack, { VStack } from '@nkzw/stack';
 import { fbs } from 'fbtee';
 import { ChangeEvent, useActionState, useState } from 'react';
 import { view } from 'react-fate';
-import { fate } from '../lib/fate.tsx';
+import { useFateClient } from 'react-fate';
 import { Button } from '../ui/Button.tsx';
 import Card from '../ui/Card.tsx';
 import AuthClient from '../user/AuthClient.tsx';
@@ -24,6 +24,7 @@ export const UserView = view<User>()({
 });
 
 const UserNameForm = ({ user }: { user: SessionUser }) => {
+  const fate = useFateClient();
   const [name, setName] = useState(user.name ?? '');
   const [error, setError] = useState<string | null>(null);
 

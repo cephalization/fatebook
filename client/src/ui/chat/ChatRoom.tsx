@@ -4,8 +4,8 @@ import { LucideLock, SendIcon } from 'lucide-react';
 import { startTransition, useActionState, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ConnectionRef, useListView, useRequest, useView, view, ViewRef } from 'react-fate';
+import { useFateClient } from 'react-fate';
 import cx from '../../lib/cx.tsx';
-import { fate } from '../../lib/fate.tsx';
 import AuthClient from '../../user/AuthClient.tsx';
 import { Button } from '../Button.tsx';
 import Error from '../Error.tsx';
@@ -41,8 +41,8 @@ export const ChatRoom = ({ chatRoomId }: { chatRoomId: string }) => {
   const { chatRoom: chatRoomRef } = useRequest({
     chatRoom: {
       id: chatRoomId,
-      root: ChatRoomView,
       type: 'ChatRoom',
+      view: ChatRoomView,
     },
   } as const);
   const chatRoom = useView(ChatRoomView, chatRoomRef);
@@ -65,6 +65,7 @@ export const ChatRoom = ({ chatRoomId }: { chatRoomId: string }) => {
 };
 
 const ChatRoomInput = ({ chatRoom }: { chatRoom: { id: string } }) => {
+  const fate = useFateClient();
   const chatRoomId = chatRoom.id;
   const { data: session } = AuthClient.useSession();
   const thisUserId = session?.user?.id;
@@ -74,7 +75,7 @@ const ChatRoomInput = ({ chatRoom }: { chatRoom: { id: string } }) => {
       return;
     }
     setMessage('');
-    const result = await fate.mutations.chatroommessage.add({
+    const result = await fate.mutations.chatRoomMessage.add({
       input: { chatRoomId, content: message },
       optimistic: {
         author: {

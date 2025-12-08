@@ -7,10 +7,8 @@ import { profileRouter } from './trpc/routers/profile.ts';
 import { userRouter } from './trpc/routers/user.ts';
 
 export const appRouter = router({
-  // cannot use camelCase for router keys because the fate generate CLI gets angry
-  chatroom: chatRoomRouter,
-  // cannot use camelCase for router keys because the fate generate CLI gets angry
-  chatroommessage: chatRoomMessageRouter,
+  chatRoom: chatRoomRouter,
+  chatRoomMessage: chatRoomMessageRouter,
   comment: commentRouter,
   post: postRouter,
   profile: profileRouter,

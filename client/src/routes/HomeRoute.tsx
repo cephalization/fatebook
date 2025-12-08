@@ -44,17 +44,15 @@ const PostFeed = ({ posts: postsRef }: { posts: ConnectionRef<'Post'> }) => {
   ) : null;
 };
 
-const request = {
-  posts: {
-    root: PostConnectionView,
-    type: 'Post',
-  },
-} as const;
-
 export default function HomeRoute() {
   const { data: session } = AuthClient.useSession();
   const user = session?.user;
-  const { posts } = useRequest(request);
+  const { posts } = useRequest({
+    posts: {
+      list: PostConnectionView,
+      type: 'Post',
+    },
+  } as const);
 
   return (
     <Section gap={32}>

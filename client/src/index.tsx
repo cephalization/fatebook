@@ -2,14 +2,16 @@
 
 import './App.css';
 import Stack from '@nkzw/stack';
+import { httpBatchLink } from '@trpc/client';
 import { createLocaleContext } from 'fbtee';
-import { StrictMode, Suspense } from 'react';
+import { StrictMode, Suspense, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 import { FateClient } from 'react-fate';
 import { BrowserRouter, Route, Routes } from 'react-router';
+import { createFateClient } from './fate.ts';
 import AvailableLanguages from './lib/AvailableLanguages.tsx';
-import { fate } from './lib/fate.tsx';
+import env from './lib/env.tsx';
 import HomeRoute from './routes/HomeRoute.tsx';
 import PostRoute from './routes/PostRoute.tsx';
 import ProfileRoute from './routes/ProfileRoute.tsx';
@@ -20,6 +22,7 @@ import { ChatModal } from './ui/chat/ChatModal.tsx';
 import Error from './ui/Error.tsx';
 import Header from './ui/Header.tsx';
 import Section from './ui/Section.tsx';
+import AuthClient from './user/AuthClient.tsx';
 
 const LocaleContext = createLocaleContext({
   availableLanguages: AvailableLanguages,
@@ -34,51 +37,75 @@ const LocaleContext = createLocaleContext({
 });
 
 const App = () => {
+  const { data: session } = AuthClient.useSession();
+  const userId = session?.user.id;
+
+  const fate = useMemo(
+    () =>
+      createFateClient({
+        links: [
+          httpBatchLink({
+            fetch: (input, init) =>
+              fetch(input, {
+                ...init,
+                credentials: userId ? 'include' : undefined,
+              }),
+            url: `${env('SERVER_URL')}/trpc`,
+          }),
+        ],
+      }),
+    [userId],
+  );
+
   return (
-    <div className="min-h-screen">
-      <div className="min-h-screen bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_35%),radial-gradient(circle_at_80%_0,rgba(99,102,241,0.08),transparent_28%)]">
-        <Header />
-        <ErrorBoundary
-          fallbackRender={({ error }) => (
-            <Section>
-              <Card>
-                <Error error={error} />
-              </Card>
-            </Section>
-          )}
-        >
-          <Suspense
-            fallback={
-              <Section>
-                <Stack center className="animate-pulse text-gray-500 italic" verticalPadding={48}>
-                  <fbt desc="Text for thinking/loading screen">Thinking…</fbt>
-                </Stack>
-              </Section>
-            }
-          >
-            <Routes>
-              <Route element={<HomeRoute />} path="/" />
-              <Route element={<PostRoute />} path="/post/:id" />
-              <Route element={<ProfileRoute />} path="/profile/:userId" />
-              <Route element={<SearchRoute />} path="/search" />
-              <Route element={<SignInRoute />} path="/login" />
-            </Routes>
-          </Suspense>
-          <ChatModal className="fixed bottom-4 right-4" />
-        </ErrorBoundary>
-      </div>
-    </div>
+    <LocaleContext>
+      <FateClient client={fate} key={userId}>
+        <BrowserRouter>
+          <div className="min-h-screen">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_35%),radial-gradient(circle_at_80%_0,rgba(99,102,241,0.08),transparent_28%)]">
+              <Header />
+              <ErrorBoundary
+                fallbackRender={({ error }) => (
+                  <Section>
+                    <Card>
+                      <Error error={error} />
+                    </Card>
+                  </Section>
+                )}
+              >
+                <Suspense
+                  fallback={
+                    <Section>
+                      <Stack
+                        center
+                        className="animate-pulse text-gray-500 italic"
+                        verticalPadding={48}
+                      >
+                        <fbt desc="Text for thinking/loading screen">Thinking…</fbt>
+                      </Stack>
+                    </Section>
+                  }
+                >
+                  <Routes>
+                    <Route element={<HomeRoute />} path="/" />
+                    <Route element={<PostRoute />} path="/post/:id" />
+                    <Route element={<ProfileRoute />} path="/profile/:userId" />
+                    <Route element={<SearchRoute />} path="/search" />
+                    <Route element={<SignInRoute />} path="/login" />
+                  </Routes>
+                </Suspense>
+                <ChatModal className="fixed bottom-4 right-4" />
+              </ErrorBoundary>
+            </div>
+          </div>
+        </BrowserRouter>
+      </FateClient>
+    </LocaleContext>
   );
 };
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <LocaleContext>
-      <FateClient client={fate}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </FateClient>
-    </LocaleContext>
+    <App />
   </StrictMode>,
 );

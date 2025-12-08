@@ -6,7 +6,6 @@ import type {
   Comment,
   Post,
   Profile,
-  User,
 } from '@app/server/src/router.ts';
 import { createTRPCProxyClient } from '@trpc/client';
 import { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
@@ -16,76 +15,72 @@ type TRPCClientType = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
 type RouterInputs = inferRouterInputs<AppRouter>;
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
+const mutations = {
+  'chatRoom.create': mutation<
+    ChatRoom,
+    RouterInputs['chatRoom']['create'],
+    RouterOutputs['chatRoom']['create']
+  >('ChatRoom'),
+  'chatRoomMessage.add': mutation<
+    ChatRoomMessage,
+    RouterInputs['chatRoomMessage']['add'],
+    RouterOutputs['chatRoomMessage']['add']
+  >('ChatRoomMessage'),
+  'chatRoomMessage.delete': mutation<
+    ChatRoomMessage,
+    RouterInputs['chatRoomMessage']['delete'],
+    RouterOutputs['chatRoomMessage']['delete']
+  >('ChatRoomMessage'),
+  'chatRoomMessage.edit': mutation<
+    ChatRoomMessage,
+    RouterInputs['chatRoomMessage']['edit'],
+    RouterOutputs['chatRoomMessage']['edit']
+  >('ChatRoomMessage'),
+  'comment.add': mutation<Comment, RouterInputs['comment']['add'], RouterOutputs['comment']['add']>(
+    'Comment',
+  ),
+  'comment.delete': mutation<
+    Comment,
+    RouterInputs['comment']['delete'],
+    RouterOutputs['comment']['delete']
+  >('Comment'),
+  'post.like': mutation<Post, RouterInputs['post']['like'], RouterOutputs['post']['like']>('Post'),
+  'post.unlike': mutation<Post, RouterInputs['post']['unlike'], RouterOutputs['post']['unlike']>(
+    'Post',
+  ),
+  'profile.update': mutation<
+    Profile,
+    RouterInputs['profile']['update'],
+    RouterOutputs['profile']['update']
+  >('Profile'),
+} as const;
+
+type GeneratedClientMutations = typeof mutations;
+
+declare module 'react-fate' {
+  interface ClientMutations extends GeneratedClientMutations {}
+}
+
 export const createFateClient = (options: {
   links: Parameters<typeof createTRPCProxyClient>[0]['links'];
 }) => {
   const trpcClient = createTRPCProxyClient<AppRouter>(options);
 
-  const mutations = {
-    'chatroom.create': (client: TRPCClientType) => client.chatroom.create.mutate,
-    'chatroommessage.add': (client: TRPCClientType) => client.chatroommessage.add.mutate,
-    'chatroommessage.delete': (client: TRPCClientType) => client.chatroommessage.delete.mutate,
-    'chatroommessage.edit': (client: TRPCClientType) => client.chatroommessage.edit.mutate,
+  const trpcMutations = {
+    'chatRoom.create': (client: TRPCClientType) => client.chatRoom.create.mutate,
+    'chatRoomMessage.add': (client: TRPCClientType) => client.chatRoomMessage.add.mutate,
+    'chatRoomMessage.delete': (client: TRPCClientType) => client.chatRoomMessage.delete.mutate,
+    'chatRoomMessage.edit': (client: TRPCClientType) => client.chatRoomMessage.edit.mutate,
     'comment.add': (client: TRPCClientType) => client.comment.add.mutate,
     'comment.delete': (client: TRPCClientType) => client.comment.delete.mutate,
     'post.like': (client: TRPCClientType) => client.post.like.mutate,
     'post.unlike': (client: TRPCClientType) => client.post.unlike.mutate,
     'profile.update': (client: TRPCClientType) => client.profile.update.mutate,
-    'user.update': (client: TRPCClientType) => client.user.update.mutate,
   } as const;
 
   return createClient({
-    mutations: {
-      'chatroom.create': mutation<
-        ChatRoom,
-        RouterInputs['chatroom']['create'],
-        RouterOutputs['chatroom']['create']
-      >('ChatRoom'),
-      'chatroommessage.add': mutation<
-        ChatRoomMessage,
-        RouterInputs['chatroommessage']['add'],
-        RouterOutputs['chatroommessage']['add']
-      >('ChatRoomMessage'),
-      'chatroommessage.delete': mutation<
-        ChatRoomMessage,
-        RouterInputs['chatroommessage']['delete'],
-        RouterOutputs['chatroommessage']['delete']
-      >('ChatRoomMessage'),
-      'chatroommessage.edit': mutation<
-        ChatRoomMessage,
-        RouterInputs['chatroommessage']['edit'],
-        RouterOutputs['chatroommessage']['edit']
-      >('ChatRoomMessage'),
-      'comment.add': mutation<
-        Comment,
-        RouterInputs['comment']['add'],
-        RouterOutputs['comment']['add']
-      >('Comment'),
-      'comment.delete': mutation<
-        Comment,
-        RouterInputs['comment']['delete'],
-        RouterOutputs['comment']['delete']
-      >('Comment'),
-      'post.like': mutation<Post, RouterInputs['post']['like'], RouterOutputs['post']['like']>(
-        'Post',
-      ),
-      'post.unlike': mutation<
-        Post,
-        RouterInputs['post']['unlike'],
-        RouterOutputs['post']['unlike']
-      >('Post'),
-      'profile.update': mutation<
-        Profile,
-        RouterInputs['profile']['update'],
-        RouterOutputs['profile']['update']
-      >('Profile'),
-      'user.update': mutation<
-        User,
-        RouterInputs['user']['update'],
-        RouterOutputs['user']['update']
-      >('User'),
-    },
-    transport: createTRPCTransport<AppRouter, typeof mutations>({
+    mutations,
+    transport: createTRPCTransport<AppRouter, typeof trpcMutations>({
       byId: {
         ChatRoom:
           (client: TRPCClientType) =>
@@ -98,7 +93,7 @@ export const createFateClient = (options: {
             ids: Array<string | number>;
             select: Array<string>;
           }) =>
-            client.chatroom.byId.query({
+            client.chatRoom.byId.query({
               args,
               ids: ids.map(String),
               select,
@@ -114,7 +109,7 @@ export const createFateClient = (options: {
             ids: Array<string | number>;
             select: Array<string>;
           }) =>
-            client.chatroommessage.byId.query({
+            client.chatRoomMessage.byId.query({
               args,
               ids: ids.map(String),
               select,
@@ -167,32 +162,19 @@ export const createFateClient = (options: {
               ids: ids.map(String),
               select,
             }),
-        User:
-          (client: TRPCClientType) =>
-          ({
-            args,
-            ids,
-            select,
-          }: {
-            args?: Record<string, unknown>;
-            ids: Array<string | number>;
-            select: Array<string>;
-          }) =>
-            client.user.byId.query({
-              args,
-              ids: ids.map(String),
-              select,
-            }),
       },
       client: trpcClient,
+      queries: {
+        profile: (client: TRPCClientType) => client.profile.byUserId.query,
+      },
       lists: {
-        chatRoomMessageSearch: (client: TRPCClientType) => client.chatroommessage.search.query,
-        chatRooms: (client: TRPCClientType) => client.chatroom.list.query,
+        chatRoomMessages: (client: TRPCClientType) => client.chatRoomMessage.list.query,
+        chatRoomMessageSearch: (client: TRPCClientType) => client.chatRoomMessage.search.query,
+        chatRooms: (client: TRPCClientType) => client.chatRoom.list.query,
         commentSearch: (client: TRPCClientType) => client.comment.search.query,
         posts: (client: TRPCClientType) => client.post.list.query,
-        profileByUserId: (client: TRPCClientType) => client.profile.byUserId.query,
       },
-      mutations,
+      mutations: trpcMutations,
     }),
     types: [
       {
@@ -209,18 +191,18 @@ export const createFateClient = (options: {
       },
       {
         fields: {
+          author: { type: 'User' },
+          chatRoom: { type: 'ChatRoom' },
+        },
+        type: 'ChatRoomMessage',
+      },
+      {
+        fields: {
           adminsInChatRoom: { listOf: 'User' },
           chatRoomMessages: { listOf: 'ChatRoomMessage' },
           usersInChatRoom: { listOf: 'User' },
         },
         type: 'ChatRoom',
-      },
-      {
-        fields: {
-          author: { type: 'User' },
-          chatRoom: { type: 'ChatRoom' },
-        },
-        type: 'ChatRoomMessage',
       },
       {
         fields: {

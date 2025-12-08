@@ -5,9 +5,8 @@ import Stack, { VStack } from '@nkzw/stack';
 import { fbs } from 'fbtee';
 import { ChangeEvent, Suspense, useActionState, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { useRequest, useView, view, ViewRef } from 'react-fate';
+import { useFateClient, useRequest, useView, view, ViewRef } from 'react-fate';
 import { useParams } from 'react-router';
-import { fate } from '../lib/fate.tsx';
 import { Button } from '../ui/Button.tsx';
 import Card from '../ui/Card.tsx';
 import ErrorDisplay from '../ui/Error.tsx';
@@ -48,6 +47,7 @@ const ProfileEditForm = ({
     website: string | null;
   };
 }) => {
+  const fate = useFateClient();
   const [formData, setFormData] = useState({
     bio: profile.bio ?? '',
     github: profile.github ?? '',
@@ -354,15 +354,13 @@ const ProfileCard = ({ profile: profileRef }: { profile: ViewRef<'Profile'> }) =
 };
 
 const ProfileContent = ({ userId }: { userId: string }) => {
-  const { profileByUserId } = useRequest({
-    profileByUserId: {
+  const { profile } = useRequest({
+    profile: {
       args: { userId },
-      root: ProfileView,
       type: 'Profile',
+      view: ProfileView,
     },
   } as const);
-
-  const profile = profileByUserId[0];
 
   return <ProfileCard profile={profile} />;
 };

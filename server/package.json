@@ -12,7 +12,7 @@
     "build": "tsdown",
     "dev": "NODE_ENV=development node_modules/.bin/nodemon -q -I --exec node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm --env-file .env src/index.tsx",
     "dev:setup": "pnpm prisma generate",
-    "fate:generate": "dotenv -e .env pnpm fate generate @app/server/src/router.ts ../client/src/lib/fate.generated.ts"
+    "fate:generate": "dotenv -e .env pnpm fate generate @app/server/src/router.ts ../client/src/fate.ts"
   },
   "nodemonConfig": {
     "ext": "ts,tsx",
@@ -25,7 +25,7 @@
     "@hono/trpc-server": "^0.4.1",
     "@nkzw/core": "^1.3.1",
     "@nkzw/define-env": "^1.1.0",
-    "@nkzw/fate": "^0.0.6",
+    "@nkzw/fate": "^0.0.8",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@trpc/server": "^11.7.2",

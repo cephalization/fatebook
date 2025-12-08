@@ -33,7 +33,7 @@ const SearchResults = ({ isStale, query }: { isStale: boolean; query: string }) 
   const { commentSearch } = useRequest({
     commentSearch: {
       args: { query },
-      root: CommentSearchView,
+      list: CommentSearchView,
       type: 'Comment',
     },
   } as const);

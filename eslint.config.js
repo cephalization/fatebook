@@ -8,6 +8,7 @@ export default [
       'coverage',
       'dist',
       'client/dist',
+      'client/src/fate.ts',
       'server/dist',
       'server/src/prisma/pothos-types.ts',
       'server/src/prisma/prisma-client/*',

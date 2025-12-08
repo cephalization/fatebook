@@ -67,8 +67,8 @@ export const userDataView = dataView<PrismaUser>('User')({
 
 const basePost = {
   author: userDataView,
-  commentCount: resolver<PostItem>({
-    resolve: ({ item }) => item._count?.comments ?? 0,
+  commentCount: resolver<PostItem, number>({
+    resolve: ({ _count }) => _count?.comments ?? 0,
     select: () => ({
       _count: { select: { comments: true } },
     }),
@@ -166,11 +166,11 @@ export type ChatRoomMessage = Entity<
   }
 >;
 
-export const Lists = {
-  chatRoomMessages: chatRoomMessageDataView,
-  chatRoomMessageSearch: { procedure: 'search', view: chatRoomMessageDataView },
-  chatRooms: chatRoomDataView,
-  commentSearch: { procedure: 'search', view: commentDataView },
-  posts: postDataView,
-  profileByUserId: { procedure: 'byUserId', view: profileDataView },
+export const Root = {
+  chatRoomMessages: list(chatRoomMessageDataView),
+  chatRoomMessageSearch: { procedure: 'search', view: list(chatRoomMessageDataView) },
+  chatRooms: list(chatRoomDataView),
+  commentSearch: { procedure: 'search', view: list(commentDataView) },
+  posts: list(postDataView),
+  profile: { procedure: 'byUserId', view: profileDataView },
 };

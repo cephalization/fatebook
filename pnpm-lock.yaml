@@ -114,8 +114,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0(react@19.2.1)
       react-fate:
-        specifier: ^0.0.6
-        version: 0.0.6(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: ^0.0.8
+        version: 0.0.8(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react-router:
         specifier: ^7.10.1
         version: 7.10.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -166,8 +166,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       '@nkzw/fate':
-        specifier: ^0.0.6
-        version: 0.0.6(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))
+        specifier: ^0.0.8
+        version: 0.0.8(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))
       '@prisma/adapter-pg':
         specifier: ^7.1.0
         version: 7.1.0
@@ -754,8 +754,8 @@ packages:
     peerDependencies:
       eslint: '>= 9'
 
-  '@nkzw/fate@0.0.6':
-    resolution: {integrity: sha512-kIOzOYsLY7pHkzY28LdgDrtbTqjfOvQ6YBgcdoor38cOvQAeMzaYxr3jnwXOtD5L26EiFHqwlcJaCteTVbVOkA==}
+  '@nkzw/fate@0.0.8':
+    resolution: {integrity: sha512-w8HzsEZD+i/1M4klj+G/LuWnJF8la/O+puhq9QsxScN04xfdHKXBtAgKT31meqxUm2MhxP1X/RcPSPCVz92Ytg==}
     hasBin: true
     peerDependencies:
       '@trpc/client': ^11.6.0
@@ -3816,8 +3816,8 @@ packages:
     peerDependencies:
       react: '>=16.13.1'
 
-  react-fate@0.0.6:
-    resolution: {integrity: sha512-phi70eUnnkDhE6+lz7QQDBUn9qzsx8GYSnQf00U3MZhvPNaBBDR77Y5ixkEhv3MuGiz+Z/0S62c6a7oIr3SsWQ==}
+  react-fate@0.0.8:
+    resolution: {integrity: sha512-ufoHzgcZbtEuIq/g1z2FRosZmHyEPqMkZL+x5+Jyl4f2pZocUIHopygGs4uIlJfwkKfMk8x6qEwk9EZgD4xr/w==}
     hasBin: true
     peerDependencies:
       react: ^19.2.0
@@ -5151,7 +5151,7 @@ snapshots:
     dependencies:
       eslint: 9.39.1(jiti@2.6.1)
 
-  '@nkzw/fate@0.0.6(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))':
+  '@nkzw/fate@0.0.8(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))':
     dependencies:
       '@trpc/client': 11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3)
       superjson: 2.2.6
@@ -8829,9 +8829,9 @@ snapshots:
       '@babel/runtime': 7.28.4
       react: 19.2.1
 
-  react-fate@0.0.6(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+  react-fate@0.0.8(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
-      '@nkzw/fate': 0.0.6(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))
+      '@nkzw/fate': 0.0.8(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
     transitivePeerDependencies:
