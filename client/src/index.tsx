@@ -2,7 +2,6 @@
 
 import './App.css';
 import Stack from '@nkzw/stack';
-import { httpBatchLink } from '@trpc/client';
 import { createLocaleContext } from 'fbtee';
 import { StrictMode, Suspense, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -11,7 +10,7 @@ import { FateClient } from 'react-fate';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { createFateClient } from './fate.ts';
 import AvailableLanguages from './lib/AvailableLanguages.tsx';
-import env from './lib/env.tsx';
+import { createLinks } from './lib/createLinks.ts';
 import HomeRoute from './routes/HomeRoute.tsx';
 import PostRoute from './routes/PostRoute.tsx';
 import ProfileRoute from './routes/ProfileRoute.tsx';
@@ -43,16 +42,7 @@ const App = () => {
   const fate = useMemo(
     () =>
       createFateClient({
-        links: [
-          httpBatchLink({
-            fetch: (input, init) =>
-              fetch(input, {
-                ...init,
-                credentials: userId ? 'include' : undefined,
-              }),
-            url: `${env('SERVER_URL')}/trpc`,
-          }),
-        ],
+        links: createLinks(userId),
       }),
     [userId],
   );

@@ -1,10 +1,18 @@
-import type { ChatRoomMessage, ChatRoom as ChatRoomType, User } from '@app/server/src/router.ts';
+import type {
+  AppRouter,
+  ChatRoomMessage,
+  ChatRoom as ChatRoomType,
+  User,
+} from '@app/server/src/router.ts';
+import { ConnectionTag } from '@nkzw/fate';
+import { createTRPCProxyClient } from '@trpc/client';
 import { fbs } from 'fbtee';
 import { LucideLock, SendIcon } from 'lucide-react';
-import { startTransition, useActionState, useState } from 'react';
+import { startTransition, useActionState, useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ConnectionRef, useListView, useRequest, useView, view, ViewRef } from 'react-fate';
 import { useFateClient } from 'react-fate';
+import { createLinks } from '../../lib/createLinks.ts';
 import cx from '../../lib/cx.tsx';
 import AuthClient from '../../user/AuthClient.tsx';
 import { Button } from '../Button.tsx';
@@ -21,6 +29,7 @@ const ChatRoomMessageView = view<ChatRoomMessage>()({
   content: true,
   id: true,
   updatedAt: true,
+  createdAt: true,
 });
 
 const ChatRoomMessageConnectionView = {
@@ -56,7 +65,7 @@ export const ChatRoom = ({ chatRoomId }: { chatRoomId: string }) => {
               <p className="text-sm text-gray-500">{chatRoom.description}</p>
             )}
           </div>
-          <ChatRoomMessages chatRoomMessages={chatRoom.chatRoomMessages} />
+          <ChatRoomMessages chatRoomId={chatRoomId} chatRoomMessages={chatRoom.chatRoomMessages} />
           <ChatRoomInput chatRoom={chatRoom} />
         </div>
       </ErrorBoundary>
@@ -120,12 +129,71 @@ const ChatRoomInput = ({ chatRoom }: { chatRoom: { id: string } }) => {
   );
 };
 
+const useChatRoomMessages = ({
+  chatRoomId,
+  chatRoomMessagesRef,
+}: {
+  chatRoomId: string;
+  chatRoomMessagesRef: ConnectionRef<'ChatRoomMessage'>;
+}) => {
+  const fate = useFateClient();
+  const [chatRoomMessages] = useListView(ChatRoomMessageConnectionView, chatRoomMessagesRef);
+  const { data: session } = AuthClient.useSession();
+  const userId = session?.user?.id;
+  const trpc = useMemo(
+    () =>
+      createTRPCProxyClient<AppRouter>({
+        links: createLinks(userId),
+      }),
+    [userId],
+  );
+  const [lastEventId, setLastEventId] = useState<string | null>(() => {
+    // @ts-expect-error - TODO: fix this
+    const list = fate.store.getListState(chatRoomMessagesRef[ConnectionTag].key);
+    const lastItemId = list?.ids?.[list.ids.length - 1];
+    const lastItem = lastItemId ? fate.store.read(lastItemId) : null;
+    const createdAt = typeof lastItem?.createdAt === 'string' ? lastItem.createdAt : null;
+    return createdAt;
+  });
+  useEffect(() => {
+    const subscription = trpc.chatRoomMessage.onChatMessageAdded.subscribe(
+      {
+        chatRoomId,
+        lastEventId,
+      },
+      {
+        onData: ({ data, id }) => {
+          if (id === lastEventId) {
+            return;
+          }
+          setLastEventId(data.createdAt);
+          fate.store.merge(`ChatRoomMessage:${data.id}`, data, new Set(Object.keys(data)));
+          // @ts-expect-error - TODO: fix this
+          const list = fate.store.getListState(chatRoomMessagesRef[ConnectionTag].key);
+          // @ts-expect-error - TODO: fix this
+          fate.store.setList(chatRoomMessagesRef[ConnectionTag].key, {
+            ...list,
+            ids: [...(list?.ids || []), `ChatRoomMessage:${data.id}`],
+          });
+        },
+      },
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [chatRoomId]);
+  return chatRoomMessages;
+};
+
 export const ChatRoomMessages = ({
+  chatRoomId,
   chatRoomMessages: chatRoomMessagesRef,
 }: {
+  chatRoomId: string;
   chatRoomMessages: ConnectionRef<'ChatRoomMessage'>;
 }) => {
-  const [chatRoomMessages] = useListView(ChatRoomMessageConnectionView, chatRoomMessagesRef);
+  const chatRoomMessages = useChatRoomMessages({ chatRoomId, chatRoomMessagesRef });
   if (chatRoomMessages.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center text-gray-400">

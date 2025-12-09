@@ -1,5 +1,6 @@
 import { connectionArgs, createResolver } from '@nkzw/fate/server';
 import { TRPCError } from '@trpc/server';
+import { tracked } from '@trpc/server';
 import { z } from 'zod';
 import type {
   ChatRoomMessageFindManyArgs,
@@ -9,6 +10,8 @@ import type {
 import { createConnectionProcedure } from '../connection.ts';
 import { procedure, router } from '../init.ts';
 import { chatRoomMessageDataView, type ChatRoomMessageItem } from '../views.ts';
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getChatRoomPrivacyClause = (thisUserId?: string) => {
   if (!thisUserId) {
@@ -266,6 +269,57 @@ export const chatRoomMessageRouter = router({
       return resolveMany(direction === 'forward' ? items : items.reverse());
     },
   }),
+  onChatMessageAdded: procedure
+    .input(
+      z.object({
+        lastEventId: z.coerce.date().nullish(),
+        chatRoomId: z.string().min(1, 'Chat room id is required'),
+      }),
+    )
+    .subscription(async function* ({ ctx, input, signal }) {
+      // `opts.signal` is an AbortSignal that will be aborted when the client disconnects.
+      let lastEventId = input?.lastEventId ?? null;
+      // We use a `while` loop that checks `!opts.signal.aborted`
+      while (!signal!.aborted) {
+        const thisUserId = ctx.sessionUser?.id;
+        if (!thisUserId) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'You must be logged in to subscribe to chat room messages',
+          });
+        }
+        const chatRoomMessages = await ctx.prisma.chatRoomMessage.findMany({
+          // If we have a `lastEventId`, we only fetch posts created after it.
+          where: lastEventId
+            ? {
+                chatRoom: {
+                  id: input.chatRoomId,
+                  ...getChatRoomPrivacyClause(thisUserId),
+                },
+                createdAt: {
+                  gt: lastEventId,
+                },
+              }
+            : {
+                chatRoom: {
+                  id: input.chatRoomId,
+                  ...getChatRoomPrivacyClause(thisUserId),
+                },
+              },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        });
+        for (const chatRoomMessage of chatRoomMessages) {
+          // `tracked` is a helper that sends an `id` with each event.
+          // This allows the client to resume from the last received event upon reconnection.
+          yield tracked(chatRoomMessage.createdAt.toJSON(), chatRoomMessage);
+          lastEventId = chatRoomMessage.createdAt;
+        }
+        // Wait for a bit before polling again to avoid hammering the database.
+        await sleep(1_000);
+      }
+    }),
   search: createConnectionProcedure({
     input: z.object({
       query: z.string().min(1, 'Search query is required'),

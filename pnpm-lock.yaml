@@ -77,6 +77,9 @@ importers:
       '@nkzw/define-env':
         specifier: ^1.1.0
         version: 1.1.0
+      '@nkzw/fate':
+        specifier: 0.0.8
+        version: 0.0.8(@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3))
       '@nkzw/stack':
         specifier: ^2.3.2
         version: 2.3.2(react@19.2.1)
