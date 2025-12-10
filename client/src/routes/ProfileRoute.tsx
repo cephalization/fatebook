@@ -239,7 +239,7 @@ const ProfileEditForm = ({
       {error && <p className="text-destructive text-sm">{error}</p>}
 
       <Stack end>
-        <Button disabled={isPending} size="sm" type="submit" variant="secondary">
+        <Button isDisabled={isPending} size="sm" type="submit" variant="secondary">
           <fbt desc="Save profile button">Save Changes</fbt>
         </Button>
       </Stack>
@@ -354,15 +354,16 @@ const ProfileCard = ({ profile: profileRef }: { profile: ViewRef<'Profile'> }) =
 };
 
 const ProfileContent = ({ userId }: { userId: string }) => {
-  const { profile } = useRequest({
-    profile: {
+  const { profileByUserId } = useRequest({
+    profileByUserId: {
       args: { userId },
-      type: 'Profile',
       view: ProfileView,
     },
   } as const);
-
-  return <ProfileCard profile={profile} />;
+  if (!profileByUserId) {
+    return null;
+  }
+  return <ProfileCard profile={profileByUserId} />;
 };
 
 export default function ProfileRoute() {

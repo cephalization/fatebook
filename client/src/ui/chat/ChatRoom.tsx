@@ -27,9 +27,9 @@ const UserView = view<User>()({
 const ChatRoomMessageView = view<ChatRoomMessage>()({
   author: UserView,
   content: true,
+  createdAt: true,
   id: true,
   updatedAt: true,
-  createdAt: true,
 });
 
 const ChatRoomMessageConnectionView = {
@@ -150,7 +150,7 @@ const useChatRoomMessages = ({
   const [lastEventId, setLastEventId] = useState<string | null>(() => {
     // @ts-expect-error - TODO: fix this
     const list = fate.store.getListState(chatRoomMessagesRef[ConnectionTag].key);
-    const lastItemId = list?.ids?.[list.ids.length - 1];
+    const lastItemId = list?.ids?.at(-1);
     const lastItem = lastItemId ? fate.store.read(lastItemId) : null;
     const createdAt = typeof lastItem?.createdAt === 'string' ? lastItem.createdAt : null;
     return createdAt;
@@ -173,8 +173,11 @@ const useChatRoomMessages = ({
           // @ts-expect-error - TODO: fix this
           fate.store.setList(chatRoomMessagesRef[ConnectionTag].key, {
             ...list,
+            cursors: [...(list?.cursors || []), data.id],
             ids: [...(list?.ids || []), `ChatRoomMessage:${data.id}`],
           });
+          console.log(fate.store.getListState(chatRoomMessagesRef[ConnectionTag].key));
+          console.log(fate.store.read(`ChatRoomMessage:${data.id}`));
         },
       },
     );
@@ -182,7 +185,13 @@ const useChatRoomMessages = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [chatRoomId]);
+  }, [
+    chatRoomId,
+    chatRoomMessagesRef,
+    fate.store,
+    lastEventId,
+    trpc.chatRoomMessage.onChatMessageAdded,
+  ]);
   return chatRoomMessages;
 };
 
@@ -194,6 +203,7 @@ export const ChatRoomMessages = ({
   chatRoomMessages: ConnectionRef<'ChatRoomMessage'>;
 }) => {
   const chatRoomMessages = useChatRoomMessages({ chatRoomId, chatRoomMessagesRef });
+  console.log(chatRoomMessages);
   if (chatRoomMessages.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center text-gray-400">

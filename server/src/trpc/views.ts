@@ -172,5 +172,5 @@ export const Root = {
   chatRooms: list(chatRoomDataView),
   commentSearch: { procedure: 'search', view: list(commentDataView) },
   posts: list(postDataView),
-  profile: { procedure: 'byUserId', view: profileDataView },
+  profileByUserId: { procedure: 'byUserId', view: profileDataView },
 };

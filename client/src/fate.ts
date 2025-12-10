@@ -9,7 +9,7 @@ import type {
 } from '@app/server/src/router.ts';
 import { createTRPCProxyClient } from '@trpc/client';
 import { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
-import { createClient, createTRPCTransport, mutation } from 'react-fate';
+import { clientRoot, createClient, createTRPCTransport, mutation } from 'react-fate';
 
 type TRPCClientType = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
 type RouterInputs = inferRouterInputs<AppRouter>;
@@ -55,10 +55,32 @@ const mutations = {
   >('Profile'),
 } as const;
 
+const roots = {
+  chatRoom: clientRoot<RouterOutputs['chatRoom']['byId'], 'ChatRoom'>('ChatRoom'),
+  chatRoomMessage: clientRoot<RouterOutputs['chatRoomMessage']['byId'], 'ChatRoomMessage'>(
+    'ChatRoomMessage',
+  ),
+  chatRoomMessages: clientRoot<RouterOutputs['chatRoomMessage']['list'], 'ChatRoomMessage'>(
+    'ChatRoomMessage',
+  ),
+  chatRoomMessageSearch: clientRoot<RouterOutputs['chatRoomMessage']['search'], 'ChatRoomMessage'>(
+    'ChatRoomMessage',
+  ),
+  chatRooms: clientRoot<RouterOutputs['chatRoom']['list'], 'ChatRoom'>('ChatRoom'),
+  comment: clientRoot<RouterOutputs['comment']['byId'], 'Comment'>('Comment'),
+  commentSearch: clientRoot<RouterOutputs['comment']['search'], 'Comment'>('Comment'),
+  post: clientRoot<RouterOutputs['post']['byId'], 'Post'>('Post'),
+  posts: clientRoot<RouterOutputs['post']['list'], 'Post'>('Post'),
+  profile: clientRoot<RouterOutputs['profile']['byId'], 'Profile'>('Profile'),
+  profileByUserId: clientRoot<RouterOutputs['profile']['byUserId'], 'Profile'>('Profile'),
+} as const;
+
 type GeneratedClientMutations = typeof mutations;
+type GeneratedClientRoots = typeof roots;
 
 declare module 'react-fate' {
   interface ClientMutations extends GeneratedClientMutations {}
+  interface ClientRoots extends GeneratedClientRoots {}
 }
 
 export const createFateClient = (options: {
@@ -78,8 +100,9 @@ export const createFateClient = (options: {
     'profile.update': (client: TRPCClientType) => client.profile.update.mutate,
   } as const;
 
-  return createClient({
+  return createClient<[GeneratedClientRoots, GeneratedClientMutations]>({
     mutations,
+    roots,
     transport: createTRPCTransport<AppRouter, typeof trpcMutations>({
       byId: {
         ChatRoom:
@@ -165,7 +188,7 @@ export const createFateClient = (options: {
       },
       client: trpcClient,
       queries: {
-        profile: (client: TRPCClientType) => client.profile.byUserId.query,
+        profileByUserId: (client: TRPCClientType) => client.profile.byUserId.query,
       },
       lists: {
         chatRoomMessages: (client: TRPCClientType) => client.chatRoomMessage.list.query,
